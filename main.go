@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -13,7 +16,38 @@ import (
 // 	State string `json:"State"`
 // }
 
-var DummyDB []Device
+func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("[GET] /devices")
+	var result = getAllDevices()
+
+	json.NewEncoder(w).Encode(result)
+}
+
+func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	fmt.Printf("[GET] /devices/%s", id)
+
+	var result = getDeviceById(id)
+	json.NewEncoder(w).Encode(result)
+}
+
+func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("[POST] /devices")
+	reqBody, _ := ioutil.ReadAll(r.Body)
+
+	var result = createNewDevice(reqBody)
+	json.NewEncoder(w).Encode(result)
+}
+
+func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	fmt.Printf("[DELETE] /devices/%s", id)
+	deleteDevice(id)
+}
 
 // func getAllDevices(w http.ResponseWriter, r *http.Request) {
 // 	fmt.Println("[GET] /devices")
@@ -58,10 +92,10 @@ var DummyDB []Device
 
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true) // What is StrictSlash?
-	myRouter.HandleFunc("/devices", createNewDevice).Methods("POST")
-	myRouter.HandleFunc("/devices", getAllDevices)
-	myRouter.HandleFunc("/devices/{id}", deleteDevice).Methods("DELETE")
-	myRouter.HandleFunc("/devices/{id}", getDeviceById).Methods("GET")
+	myRouter.HandleFunc("/devices", newDeviceHandler).Methods("POST")
+	myRouter.HandleFunc("/devices", allDeviceHandler)
+	myRouter.HandleFunc("/devices/{id}", deleteDeviceHandler).Methods("DELETE")
+	myRouter.HandleFunc("/devices/{id}", getDeviceByIdHandler).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":5000", myRouter))
 }

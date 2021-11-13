@@ -2,11 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 type Device struct {
@@ -15,47 +10,40 @@ type Device struct {
 	State string `json:"State"`
 }
 
-// TODO: dbutils should not have anything to do with handling the request, need to modify these functions
-// to work independently of http requst functionality. Then the functions called by the request handlers
-// should also be modified to consume the request/body and prepare it for the DB functions
+var DummyDB []Device
 
-func getAllDevices(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("[GET] /devices")
-	json.NewEncoder(w).Encode(DummyDB)
+func getAllDevices() []Device {
+	return DummyDB
 }
 
-func getDeviceById(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["id"]
-
-	fmt.Printf("[GET] /devices/%s", key)
-
+func getDeviceById(id string) Device {
+	var result Device
 	for _, device := range DummyDB {
-		if device.Id == key {
-			json.NewEncoder(w).Encode(device)
+		if device.Id == id {
+			result = device
 		}
 	}
+	return result
 }
 
-func createNewDevice(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("[POST] /devices")
-	reqBody, _ := ioutil.ReadAll(r.Body)
+func createNewDevice(reqBody []byte) Device {
 	var device Device
 	json.Unmarshal(reqBody, &device) // What is Unmarshal? What is '&' doing?
 
 	DummyDB = append(DummyDB, device)
 
-	json.NewEncoder(w).Encode(device)
+	return device
 }
 
-func deleteDevice(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+func deleteDevice(id string) string {
 
-	fmt.Printf("[DELETE] /devices/%s", id)
 	for idx, device := range DummyDB {
 		if device.Id == id {
 			DummyDB = append(DummyDB[:idx], DummyDB[idx+1:]...)
+			return device.Id
+
 		}
 	}
+
+	return "-1"
 }
