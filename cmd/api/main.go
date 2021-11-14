@@ -7,12 +7,13 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	"github.com/gorilla/mux"
 )
 
 func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("[GET] /devices")
-	var result = getAllDevices()
+	var result = dbutils.GetAllDevices()
 
 	json.NewEncoder(w).Encode(result)
 }
@@ -23,7 +24,7 @@ func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("[GET] /devices/%s", id)
 
-	var result = getDeviceById(id)
+	var result = dbutils.GetDeviceById(id)
 	json.NewEncoder(w).Encode(result)
 }
 
@@ -31,7 +32,7 @@ func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("[POST] /devices")
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
-	var result = createNewDevice(reqBody)
+	var result = dbutils.CreateNewDevice(reqBody)
 	json.NewEncoder(w).Encode(result)
 }
 
@@ -40,7 +41,7 @@ func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	fmt.Printf("[DELETE] /devices/%s", id)
-	deleteDevice(id)
+	dbutils.DeleteDevice(id)
 }
 
 func handleRequests() {
@@ -54,9 +55,5 @@ func handleRequests() {
 }
 
 func main() {
-	DummyDB = []Device{
-		{Id: "1", Name: "device-1", State: "0"},
-		{Id: "2", Name: "device-2", State: "0"},
-	}
 	handleRequests()
 }

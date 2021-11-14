@@ -1,4 +1,4 @@
-package main
+package dbutils
 
 import (
 	"encoding/json"
@@ -12,11 +12,11 @@ type Device struct {
 
 var DummyDB []Device
 
-func getAllDevices() []Device {
+func GetAllDevices() []Device {
 	return DummyDB
 }
 
-func getDeviceById(id string) Device {
+func GetDeviceById(id string) Device {
 	var result Device
 	for _, device := range DummyDB {
 		if device.Id == id {
@@ -26,7 +26,7 @@ func getDeviceById(id string) Device {
 	return result
 }
 
-func createNewDevice(reqBody []byte) Device {
+func CreateNewDevice(reqBody []byte) Device {
 	var device Device
 	json.Unmarshal(reqBody, &device) // What is Unmarshal? What is '&' doing?
 
@@ -35,7 +35,7 @@ func createNewDevice(reqBody []byte) Device {
 	return device
 }
 
-func deleteDevice(id string) string {
+func DeleteDevice(id string) string {
 
 	for idx, device := range DummyDB {
 		if device.Id == id {
