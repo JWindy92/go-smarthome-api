@@ -13,6 +13,7 @@ import (
 )
 
 var Zap = zap.NewLogger("main.go")
+var MqttClient = mqtt_utils.MqttInit()
 
 func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	Zap.Logger.Infow(
@@ -84,8 +85,6 @@ func main() {
 		"host", "localhost",
 		"port", 5000,
 	)
-
-	mqtt_utils.MqttInit()
 
 	Zap.Logger.Infof("Ready to accept requests")
 	handleRequests()
