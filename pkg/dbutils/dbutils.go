@@ -58,7 +58,6 @@ func DeleteDevice(id string) string {
 		if device.Id == id {
 			DummyDB = append(DummyDB[:idx], DummyDB[idx+1:]...)
 			return device.Id
-
 		}
 	}
 

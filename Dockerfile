@@ -6,10 +6,10 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 
-COPY *.go ./
+COPY . .
 
-RUN go build -o /smart-home-api
+RUN go build -o /api ./cmd/api
 
 EXPOSE 5000
 
-CMD ["/smart-home-api"]
+CMD ["/api"]
