@@ -11,13 +11,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var Zap = zap.NewLogger()
+var Zap = zap.NewLogger("main.go")
 
 func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
-	Zap.Logger.Infof(
+	Zap.Logger.Infow(
 		"Handling Req",
-		"Method", "GET",
-		"Route", "/devices",
+		"method", "GET",
+		"route", "/devices",
 	)
 	var result = dbutils.GetAllDevices()
 
@@ -27,11 +27,11 @@ func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-	Zap.Logger.Infof(
+	Zap.Logger.Infow(
 		"Handling Req",
-		"Method", "GET",
-		"Route", "/devices/{id}",
-		"Id", id,
+		"method", "GET",
+		"route", "/devices/{id}",
+		"id", id,
 	)
 
 	var result = dbutils.GetDeviceById(id)
@@ -39,10 +39,10 @@ func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
-	Zap.Logger.Infof(
+	Zap.Logger.Infow(
 		"Handling Req",
-		"Method", "POST",
-		"Route", "/devices",
+		"method", "POST",
+		"route", "/devices",
 	)
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
@@ -53,11 +53,11 @@ func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
 func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-	Zap.Logger.Infof(
+	Zap.Logger.Infow(
 		"Handling Req",
-		"Method", "DELETE",
-		"Route", "/devices/{id}", //? Can I format this value to contain the actual Id?
-		"Id", id,
+		"method", "DELETE",
+		"route", "/devices/{id}", //? Can I format this value to contain the actual Id?
+		"id", id,
 	)
 
 	dbutils.DeleteDevice(id)

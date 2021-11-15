@@ -12,19 +12,9 @@ type Device struct {
 	State string `json:"State"`
 }
 
-// type Logger struct {
-// 	logger *zap.SugaredLogger
-// }
-
-// func NewLogger() Logger {
-// 	return Logger{
-// 		logger: zap.NewExample().Sugar(),
-// 	}
-// }
-
 var DummyDB []Device
 
-var Zap = zap.NewLogger()
+var Zap = zap.NewLogger("dbutils.go")
 
 func GetAllDevices() []Device {
 	Zap.Logger.Infow(
@@ -36,7 +26,7 @@ func GetAllDevices() []Device {
 func GetDeviceById(id string) Device {
 	Zap.Logger.Infow(
 		"Fetching device by Id",
-		"Id", id,
+		"id", id,
 	)
 	var result Device
 	for _, device := range DummyDB {
@@ -62,7 +52,7 @@ func CreateNewDevice(reqBody []byte) Device {
 func DeleteDevice(id string) string {
 	Zap.Logger.Infow(
 		"Deleting device",
-		"Id", id,
+		"id", id,
 	)
 	for idx, device := range DummyDB {
 		if device.Id == id {
