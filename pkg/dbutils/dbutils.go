@@ -2,6 +2,8 @@ package dbutils
 
 import (
 	"encoding/json"
+
+	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 )
 
 type Device struct {
@@ -10,13 +12,32 @@ type Device struct {
 	State string `json:"State"`
 }
 
+// type Logger struct {
+// 	logger *zap.SugaredLogger
+// }
+
+// func NewLogger() Logger {
+// 	return Logger{
+// 		logger: zap.NewExample().Sugar(),
+// 	}
+// }
+
 var DummyDB []Device
 
+var Zap = zap.NewLogger()
+
 func GetAllDevices() []Device {
+	Zap.Logger.Infow(
+		"Fetching all devices",
+	)
 	return DummyDB
 }
 
 func GetDeviceById(id string) Device {
+	Zap.Logger.Infow(
+		"Fetching device by Id",
+		"Id", id,
+	)
 	var result Device
 	for _, device := range DummyDB {
 		if device.Id == id {
@@ -27,6 +48,9 @@ func GetDeviceById(id string) Device {
 }
 
 func CreateNewDevice(reqBody []byte) Device {
+	Zap.Logger.Infow(
+		"Creating new device",
+	)
 	var device Device
 	json.Unmarshal(reqBody, &device) // What is Unmarshal? What is '&' doing?
 
@@ -36,7 +60,10 @@ func CreateNewDevice(reqBody []byte) Device {
 }
 
 func DeleteDevice(id string) string {
-
+	Zap.Logger.Infow(
+		"Deleting device",
+		"Id", id,
+	)
 	for idx, device := range DummyDB {
 		if device.Id == id {
 			DummyDB = append(DummyDB[:idx], DummyDB[idx+1:]...)

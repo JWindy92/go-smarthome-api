@@ -2,17 +2,23 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
+	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 	"github.com/gorilla/mux"
 )
 
+var Zap = zap.NewLogger()
+
 func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("[GET] /devices")
+	Zap.Logger.Infof(
+		"Handling Req",
+		"Method", "GET",
+		"Route", "/devices",
+	)
 	var result = dbutils.GetAllDevices()
 
 	json.NewEncoder(w).Encode(result)
@@ -21,15 +27,23 @@ func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
-
-	fmt.Printf("[GET] /devices/%s", id)
+	Zap.Logger.Infof(
+		"Handling Req",
+		"Method", "GET",
+		"Route", "/devices/{id}",
+		"Id", id,
+	)
 
 	var result = dbutils.GetDeviceById(id)
 	json.NewEncoder(w).Encode(result)
 }
 
 func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("[POST] /devices")
+	Zap.Logger.Infof(
+		"Handling Req",
+		"Method", "POST",
+		"Route", "/devices",
+	)
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
 	var result = dbutils.CreateNewDevice(reqBody)
@@ -39,8 +53,13 @@ func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
 func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
+	Zap.Logger.Infof(
+		"Handling Req",
+		"Method", "DELETE",
+		"Route", "/devices/{id}", //? Can I format this value to contain the actual Id?
+		"Id", id,
+	)
 
-	fmt.Printf("[DELETE] /devices/%s", id)
 	dbutils.DeleteDevice(id)
 }
 
@@ -55,5 +74,16 @@ func handleRequests() {
 }
 
 func main() {
+
+	defer Zap.Logger.Sync() // TODO: Find out if this single call in main is sufficent
+
+	// TODO: these values should be populated by variables
+	Zap.Logger.Infow(
+		"Starting API server",
+		"host", "localhost",
+		"port", 5000,
+	)
+
+	Zap.Logger.Infof("Ready to accept requests")
 	handleRequests()
 }
