@@ -1,0 +1,18 @@
+FROM golang:1.16-alpine
+
+WORKDIR /app
+
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
+
+COPY . .
+
+ENV GOARCH=arm64
+ENV GOOS=linux
+RUN go build -o /api ./cmd/api
+
+EXPOSE 5000
+
+RUN chmod +x /api
+CMD ["/api"]
