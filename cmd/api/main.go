@@ -8,6 +8,7 @@ import (
 
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
+	mqtt_utils "github.com/JWindy92/go-smarthome-api/pkg/mqtt_utils"
 	"github.com/gorilla/mux"
 )
 
@@ -83,6 +84,8 @@ func main() {
 		"host", "localhost",
 		"port", 5000,
 	)
+
+	mqtt_utils.MqttInit()
 
 	Zap.Logger.Infof("Ready to accept requests")
 	handleRequests()
