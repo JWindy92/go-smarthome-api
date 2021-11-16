@@ -8,12 +8,12 @@ import (
 
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
-	mqtt_utils "github.com/JWindy92/go-smarthome-api/pkg/mqtt_utils"
 	"github.com/gorilla/mux"
 )
 
 var Zap = zap.NewLogger("main.go")
-var MqttClient = mqtt_utils.MqttInit()
+
+// var MqttClient = mqtt_utils.MqttInit()
 
 func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	Zap.Logger.Infow(
