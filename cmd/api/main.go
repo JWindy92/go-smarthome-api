@@ -2,19 +2,20 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
-	mqtt_utils "github.com/JWindy92/go-smarthome-api/pkg/mqtt_utils"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var Zap = zap.NewLogger("main.go")
-var MqttClient = mqtt_utils.MqttInit()
 
+// var MqttClient = mqtt_utils.MqttInit()
+
+// TODO: the main functions called by the handlers should be run concurrently using goroutines
 func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	Zap.Logger.Infow(
 		"Handling Req",
@@ -40,15 +41,32 @@ func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
+func getDevicesByTypeHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	device_type := vars["type"]
+	Zap.Logger.Infow(
+		"Handling Req",
+		"method", "GET",
+		"route", "devices/type/{type}",
+		"type", device_type,
+	)
+
+	var result = dbutils.GetDevicesOfType(device_type)
+	json.NewEncoder(w).Encode(result)
+}
+
 func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	Zap.Logger.Infow(
 		"Handling Req",
 		"method", "POST",
 		"route", "/devices",
 	)
-	reqBody, _ := ioutil.ReadAll(r.Body)
 
-	var result = dbutils.CreateNewDevice(reqBody)
+	var prim primitive.M
+	// reqBody, _ := ioutil.ReadAll(r.Body)
+	_ = json.NewDecoder(r.Body).Decode(&prim)
+
+	var result = dbutils.CreateNewDevice(prim)
 	json.NewEncoder(w).Encode(result)
 }
 
@@ -72,6 +90,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/devices/{id}", deleteDeviceHandler).Methods("DELETE")
 	myRouter.HandleFunc("/devices/{id}", getDeviceByIdHandler).Methods("GET")
 
+	myRouter.HandleFunc("/devices/type/{type}", getDevicesByTypeHandler).Methods("GET")
 	log.Fatal(http.ListenAndServe(":5000", myRouter))
 }
 
