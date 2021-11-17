@@ -7,6 +7,7 @@ import (
 
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -40,6 +41,14 @@ func InitMongoInstance() MongoInstance {
 		dbname,
 	}
 	return mongo
+}
+
+func StringToObjectId(id string) primitive.ObjectID {
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		Zap.Logger.Errorf("error convrting string to ObjectId: %s", err)
+	}
+	return objId
 }
 
 func (m MongoInstance) close() {
@@ -100,5 +109,9 @@ func (m MongoInstance) execute_query(col string, query bson.M) (result *mongo.Cu
 	return cursor, err
 }
 
-var Mongo = InitMongoInstance()
-var _ = Mongo.ping()
+func Test_Me() string {
+	return "tests are cool!"
+}
+
+// var Mongo = InitMongoInstance()
+// var _ = Mongo.ping()

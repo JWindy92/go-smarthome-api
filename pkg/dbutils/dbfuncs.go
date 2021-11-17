@@ -11,27 +11,27 @@ import (
 
 //TODO: Breakout all device definitions to new devices package
 type Device interface {
-	getId() string
+	getId() primitive.ObjectID
 	getName() string
 	save() *mongo.InsertOneResult
 }
 
 type SonoffDevice struct {
-	Id    string `mapstructure:"_id" bson:"_id,omitempty"`
-	Name  string `mapstructure:"name" bson:"name"`
-	Type  string `mapstructure:"type" bson:"type"`
-	Topic string `mapstructure:"topic" bson:"topic"`
+	Id    primitive.ObjectID `mapstructure:"_id" bson:"_id,omitempty"`
+	Name  string             `mapstructure:"name" bson:"name"`
+	Type  string             `mapstructure:"type" bson:"type"`
+	Topic string             `mapstructure:"topic" bson:"topic"`
 }
 
 type YeelightDevice struct {
-	Id      string `mapstructure:"_id" bson:"_id,omitempty"`
-	Name    string `mapstructure:"name" bson:"name"`
-	Type    string `mapstructure:"type" bson:"type"`
-	Topic   string `mapstructure:"topic" bson:"topic"`
-	Ip_Addr string `mapstructure:"ip_addr" bson:"ip_addr"`
+	Id      primitive.ObjectID `mapstructure:"_id" bson:"_id,omitempty"`
+	Name    string             `mapstructure:"name" bson:"name"`
+	Type    string             `mapstructure:"type" bson:"type"`
+	Topic   string             `mapstructure:"topic" bson:"topic"`
+	Ip_Addr string             `mapstructure:"ip_addr" bson:"ip_addr"`
 }
 
-func (dev SonoffDevice) getId() string {
+func (dev SonoffDevice) getId() primitive.ObjectID {
 	return dev.Id
 }
 
@@ -50,7 +50,7 @@ func (dev SonoffDevice) save() *mongo.InsertOneResult {
 	return insResult
 }
 
-func (dev YeelightDevice) getId() string {
+func (dev YeelightDevice) getId() primitive.ObjectID {
 	return dev.Id
 }
 
@@ -125,7 +125,7 @@ func GetDevicesOfType(device_type string) []Device {
 	return devices
 }
 
-func GetDeviceById(id string) Device {
+func GetDeviceById(id primitive.ObjectID) Device {
 	Zap.Logger.Infow(
 		"Fetching device by Id",
 		"id", id,
@@ -133,18 +133,14 @@ func GetDeviceById(id string) Device {
 	m := InitMongoInstance()
 	defer m.close()
 
-	objId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		Zap.Logger.Errorf("invalid ObjectId: %s", err)
-	}
-	data := m.query("devices", bson.M{"_id": objId})
+	data := m.query("devices", bson.M{"_id": id})
 
 	device := mapDevicesFromPrimitives(data)[0]
 
 	return device
 }
 
-func CreateNewDevice(reqBody primitive.M) Device {
+func CreateNewDevice(reqBody primitive.M) *mongo.InsertOneResult {
 	Zap.Logger.Infow(
 		"Creating new device",
 	)
@@ -153,12 +149,12 @@ func CreateNewDevice(reqBody primitive.M) Device {
 	if err != nil {
 		Zap.Logger.Error("error mapping device object: %s", err)
 	}
-	device.save()
+	result := device.save()
 
-	return device
+	return result
 }
 
-func DeleteDevice(id string) {
+func DeleteDevice(id string) *mongo.DeleteResult {
 	Zap.Logger.Infow(
 		"Deleting device",
 		"id", id,
@@ -166,11 +162,8 @@ func DeleteDevice(id string) {
 	m := InitMongoInstance()
 	defer m.close()
 	collection := m.client.Database(m.database).Collection("devices")
-	objId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		Zap.Logger.Errorf("invalid ObjectId: %s", err)
-	}
-	result, err := collection.DeleteOne(m.context, bson.M{"_id": objId})
+
+	result, err := collection.DeleteOne(m.context, bson.M{"_id": StringToObjectId(id)})
 	if err != nil {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)
 	}
@@ -179,4 +172,5 @@ func DeleteDevice(id string) {
 		"_id", id,
 		"num_affected", result.DeletedCount,
 	)
+	return result
 }

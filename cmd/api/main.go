@@ -36,8 +36,7 @@ func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
 		"route", "/devices/{id}",
 		"id", id,
 	)
-
-	var result = dbutils.GetDeviceById(id)
+	var result = dbutils.GetDeviceById(dbutils.StringToObjectId(id))
 	json.NewEncoder(w).Encode(result)
 }
 
