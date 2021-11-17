@@ -133,7 +133,11 @@ func GetDeviceById(id string) Device {
 	m := InitMongoInstance()
 	defer m.close()
 
-	data := m.query("devices", bson.M{"_id": id})
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		Zap.Logger.Errorf("invalid ObjectId: %s", err)
+	}
+	data := m.query("devices", bson.M{"_id": objId})
 
 	device := mapDevicesFromPrimitives(data)[0]
 
@@ -162,7 +166,11 @@ func DeleteDevice(id string) {
 	m := InitMongoInstance()
 	defer m.close()
 	collection := m.client.Database(m.database).Collection("devices")
-	result, err := collection.DeleteOne(m.context, bson.M{"_id": id})
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		Zap.Logger.Errorf("invalid ObjectId: %s", err)
+	}
+	result, err := collection.DeleteOne(m.context, bson.M{"_id": objId})
 	if err != nil {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)
 	}

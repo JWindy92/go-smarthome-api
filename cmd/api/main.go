@@ -15,6 +15,7 @@ var Zap = zap.NewLogger("main.go")
 
 // var MqttClient = mqtt_utils.MqttInit()
 
+// TODO: the main functions called by the handlers should be run concurrently using goroutines
 func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	Zap.Logger.Infow(
 		"Handling Req",
