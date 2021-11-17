@@ -2,8 +2,6 @@ package dbutils
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -19,12 +17,6 @@ type MongoInstance struct {
 	context  context.Context
 	cancel   context.CancelFunc
 	database string
-}
-
-type Device struct {
-	Id    string `json:"Id"`
-	Name  string `json:"Name"`
-	State string `json:"State"`
 }
 
 const mongohost = "localhost"
@@ -86,9 +78,22 @@ func (m MongoInstance) ping() error {
 	return nil
 }
 
-func (m MongoInstance) query(col string) (result *mongo.Cursor, err error) {
+func (m MongoInstance) query(col string, query bson.M) []bson.M {
+	var devices []bson.M
+	cursor, err := m.execute_query("devices", query)
+	if err != nil {
+		Zap.Logger.Error("error querying the database", err)
+	}
+	err = cursor.All(m.context, &devices)
+	if err != nil {
+		Zap.Logger.Error("error extracting data from mongodb cursor", err)
+	}
+	return devices
+}
+
+func (m MongoInstance) execute_query(col string, query bson.M) (result *mongo.Cursor, err error) {
 	collection := m.client.Database(m.database).Collection(col)
-	cursor, err := collection.Find(m.context, bson.M{})
+	cursor, err := collection.Find(m.context, query)
 	if err != nil {
 		Zap.Logger.Errorf("Error querying database: %v\n", err)
 	}
@@ -97,59 +102,3 @@ func (m MongoInstance) query(col string) (result *mongo.Cursor, err error) {
 
 var Mongo = InitMongoInstance()
 var _ = Mongo.ping()
-
-func GetAllDevices() []Device {
-	Zap.Logger.Infow(
-		"Fetching all devices",
-	)
-	m := InitMongoInstance()
-	var devices []bson.M
-	cursor, err := m.query("devices")
-	if err != nil {
-		Zap.Logger.Error("Idk just deal with it")
-	}
-	_ = cursor.All(m.context, &devices)
-	fmt.Println(devices)
-	return DummyDB
-}
-
-func GetDeviceById(id string) Device {
-	Zap.Logger.Infow(
-		"Fetching device by Id",
-		"id", id,
-	)
-	var result Device
-	for _, device := range DummyDB {
-		if device.Id == id {
-			result = device
-		}
-	}
-	return result
-}
-
-func CreateNewDevice(reqBody []byte) Device {
-	Zap.Logger.Infow(
-		"Creating new device",
-	)
-	var device Device
-	json.Unmarshal(reqBody, &device) // What is Unmarshal? What is '&' doing?
-
-	DummyDB = append(DummyDB, device)
-
-	return device
-}
-
-func DeleteDevice(id string) string {
-	Zap.Logger.Infow(
-		"Deleting device",
-		"id", id,
-	)
-	for idx, device := range DummyDB {
-		if device.Id == id {
-			DummyDB = append(DummyDB[:idx], DummyDB[idx+1:]...)
-			return device.Id
-		}
-	}
-
-	return "-1"
-}
