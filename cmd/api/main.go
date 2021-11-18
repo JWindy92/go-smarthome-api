@@ -79,7 +79,7 @@ func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 		"id", id,
 	)
 
-	dbutils.DeleteDevice(id)
+	dbutils.DeleteDevice(dbutils.StringToObjectId(id))
 }
 
 func handleRequests() {

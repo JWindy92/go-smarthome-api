@@ -154,7 +154,7 @@ func CreateNewDevice(reqBody primitive.M) *mongo.InsertOneResult {
 	return result
 }
 
-func DeleteDevice(id string) *mongo.DeleteResult {
+func DeleteDevice(id primitive.ObjectID) *mongo.DeleteResult {
 	Zap.Logger.Infow(
 		"Deleting device",
 		"id", id,
@@ -163,7 +163,7 @@ func DeleteDevice(id string) *mongo.DeleteResult {
 	defer m.close()
 	collection := m.client.Database(m.database).Collection("devices")
 
-	result, err := collection.DeleteOne(m.context, bson.M{"_id": StringToObjectId(id)})
+	result, err := collection.DeleteOne(m.context, bson.M{"_id": id})
 	if err != nil {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)
 	}

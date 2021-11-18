@@ -43,6 +43,19 @@ func TestGetDeviceById(t *testing.T) {
 	// TODO: Once getter funcs for other attributes are in place, add checks here
 }
 
-//TODO: Test Create funciton
+func TestCreateAndDeleteDevice(t *testing.T) {
+	prim := primitive.M{
+		"name":  "test_device",
+		"type":  "sonoff",
+		"topic": "test/topic",
+	}
+	insResult := CreateNewDevice(prim)
+	if insResult.InsertedID == nil {
+		t.Errorf("failed to insert new device")
+	}
 
-//TODO: Test Delete function
+	delResult := DeleteDevice(insResult.InsertedID.(primitive.ObjectID))
+	if delResult.DeletedCount < 1 {
+		t.Errorf("failed to delete device")
+	}
+}
