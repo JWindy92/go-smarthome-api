@@ -5,8 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
-	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -22,7 +20,7 @@ func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 		"method", "GET",
 		"route", "/devices",
 	)
-	var result = dbutils.GetAllDevices()
+	var result = GetAllDevices()
 
 	json.NewEncoder(w).Encode(result)
 }

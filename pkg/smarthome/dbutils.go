@@ -1,4 +1,4 @@
-package dbutils
+package smarthome
 
 import (
 	"context"
