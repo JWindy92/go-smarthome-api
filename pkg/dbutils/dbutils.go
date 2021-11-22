@@ -24,8 +24,6 @@ const mongohost = "localhost"
 const mongoport = 27017
 const dbname = "smarthome"
 
-var DummyDB []Device
-
 var Zap = zap.NewLogger("dbutils.go")
 
 func InitMongoInstance() MongoInstance {
