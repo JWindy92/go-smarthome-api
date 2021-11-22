@@ -6,10 +6,8 @@ type Logger struct {
 	Logger *zap.SugaredLogger
 }
 
-func NewLogger(source string) Logger {
-	logger := zap.NewExample().Sugar().With(
-		"source", source,
-	)
+func NewLogger() Logger {
+	logger := zap.NewExample().Sugar()
 	return Logger{
 		Logger: logger,
 	}

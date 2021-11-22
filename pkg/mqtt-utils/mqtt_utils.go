@@ -1,4 +1,4 @@
-package smarthome
+package mqtt_utils
 
 import (
 	"fmt"
