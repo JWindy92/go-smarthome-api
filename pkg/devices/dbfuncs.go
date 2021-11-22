@@ -1,13 +1,18 @@
-package smarthome
+package devices
 
 import (
 	"fmt"
+
+	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
+	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var Zap = zap.NewLogger()
 
 //TODO: Breakout all device definitions to new devices package
 type Device interface {
@@ -40,10 +45,10 @@ func (dev SonoffDevice) getName() string {
 }
 
 func (dev SonoffDevice) save() *mongo.InsertOneResult {
-	m := InitMongoInstance()
-	defer m.close()
-	collection := m.client.Database(m.database).Collection("devices")
-	insResult, err := collection.InsertOne(m.context, dev)
+	m := dbutils.InitMongoInstance()
+	defer m.Close()
+	collection := m.Client.Database(m.Database).Collection("devices")
+	insResult, err := collection.InsertOne(m.Context, dev)
 	if err != nil {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)
 	}
@@ -59,10 +64,10 @@ func (dev YeelightDevice) getName() string {
 }
 
 func (dev YeelightDevice) save() *mongo.InsertOneResult {
-	m := InitMongoInstance()
-	defer m.close()
-	collection := m.client.Database(m.database).Collection("devices")
-	insResult, err := collection.InsertOne(m.context, dev)
+	m := dbutils.InitMongoInstance()
+	defer m.Close()
+	collection := m.Client.Database(m.Database).Collection("devices")
+	insResult, err := collection.InsertOne(m.Context, dev)
 	if err != nil {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)
 	}
@@ -99,13 +104,13 @@ func GetAllDevices() []Device {
 	Zap.Logger.Infow(
 		"Fetching all devices",
 	)
-	m := InitMongoInstance()
+	m := dbutils.InitMongoInstance()
 
-	data := m.query("devices", bson.M{})
+	data := m.Query("devices", bson.M{})
 
 	devices := mapDevicesFromPrimitives(data)
 
-	m.close()
+	m.Close()
 	return devices
 }
 
@@ -115,13 +120,13 @@ func GetDevicesOfType(device_type string) []Device {
 		"type", device_type,
 	)
 
-	m := InitMongoInstance()
+	m := dbutils.InitMongoInstance()
 
-	data := m.query("devices", bson.M{"type": device_type})
+	data := m.Query("devices", bson.M{"type": device_type})
 
 	devices := mapDevicesFromPrimitives(data)
 
-	m.close()
+	m.Close()
 	return devices
 }
 
@@ -130,10 +135,10 @@ func GetDeviceById(id primitive.ObjectID) Device {
 		"Fetching device by Id",
 		"id", id,
 	)
-	m := InitMongoInstance()
-	defer m.close()
+	m := dbutils.InitMongoInstance()
+	defer m.Close()
 
-	data := m.query("devices", bson.M{"_id": id})
+	data := m.Query("devices", bson.M{"_id": id})
 
 	device := mapDevicesFromPrimitives(data)[0]
 
@@ -159,11 +164,11 @@ func DeleteDevice(id primitive.ObjectID) *mongo.DeleteResult {
 		"Deleting device",
 		"id", id,
 	)
-	m := InitMongoInstance()
-	defer m.close()
-	collection := m.client.Database(m.database).Collection("devices")
+	m := dbutils.InitMongoInstance()
+	defer m.Close()
+	collection := m.Client.Database(m.Database).Collection("devices")
 
-	result, err := collection.DeleteOne(m.context, bson.M{"_id": id})
+	result, err := collection.DeleteOne(m.Context, bson.M{"_id": id})
 	if err != nil {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)
 	}

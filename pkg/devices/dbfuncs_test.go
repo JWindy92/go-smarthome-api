@@ -1,4 +1,4 @@
-package smarthome
+package devices
 
 import (
 	"testing"

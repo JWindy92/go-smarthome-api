@@ -5,11 +5,14 @@ import (
 	"log"
 	"net/http"
 
+	dbutils "github.com/JWindy92/go-smarthome-api/pkg/dbutils"
+	devices "github.com/JWindy92/go-smarthome-api/pkg/devices"
+	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var Zap = zap.NewLogger("main.go")
+var Zap = zap.NewLogger()
 
 // var MqttClient = mqtt_utils.MqttInit()
 
@@ -20,7 +23,7 @@ func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
 		"method", "GET",
 		"route", "/devices",
 	)
-	var result = GetAllDevices()
+	var result = devices.GetAllDevices()
 
 	json.NewEncoder(w).Encode(result)
 }
@@ -34,7 +37,7 @@ func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
 		"route", "/devices/{id}",
 		"id", id,
 	)
-	var result = dbutils.GetDeviceById(dbutils.StringToObjectId(id))
+	var result = devices.GetDeviceById(dbutils.StringToObjectId(id))
 	json.NewEncoder(w).Encode(result)
 }
 
@@ -48,7 +51,7 @@ func getDevicesByTypeHandler(w http.ResponseWriter, r *http.Request) {
 		"type", device_type,
 	)
 
-	var result = dbutils.GetDevicesOfType(device_type)
+	var result = devices.GetDevicesOfType(device_type)
 	json.NewEncoder(w).Encode(result)
 }
 
@@ -63,7 +66,7 @@ func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	// reqBody, _ := ioutil.ReadAll(r.Body)
 	_ = json.NewDecoder(r.Body).Decode(&prim)
 
-	var result = dbutils.CreateNewDevice(prim)
+	var result = devices.CreateNewDevice(prim)
 	json.NewEncoder(w).Encode(result)
 }
 
@@ -77,7 +80,7 @@ func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 		"id", id,
 	)
 
-	dbutils.DeleteDevice(dbutils.StringToObjectId(id))
+	devices.DeleteDevice(dbutils.StringToObjectId(id))
 }
 
 func handleRequests() {
