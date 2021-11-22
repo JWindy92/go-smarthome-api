@@ -10,7 +10,7 @@ import (
 var broker = "10.0.0.228"
 var port = 9002
 
-var Zap = zap.NewLogger("mqtt_utils.go")
+var Zap = zap.NewLogger()
 
 type MqttHandler struct {
 	Client *mqtt.Client
