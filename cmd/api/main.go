@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -17,42 +18,31 @@ var Zap = zap.NewLogger()
 // var MqttClient = mqtt_utils.MqttInit()
 
 // TODO: the main functions called by the handlers should be run concurrently using goroutines
-func allDeviceHandler(w http.ResponseWriter, r *http.Request) {
+func getDeviceHandler(w http.ResponseWriter, r *http.Request) {
+
+	query := r.URL.Query()
+	fmt.Println(query.Encode())
+
 	Zap.Logger.Infow(
 		"Handling Req",
 		"method", "GET",
 		"route", "/devices",
+		"parameters", query.Encode(),
 	)
-	var result = devices.GetAllDevices()
+	if query.Has("type") {
+		device_type := query.Get("type")
+		var result = devices.GetDevicesOfType(device_type)
+		json.NewEncoder(w).Encode(result)
+	} else if query.Has("id") {
+		id := query.Get("id")
+		var result = devices.GetDeviceById(dbutils.StringToObjectId(id))
+		json.NewEncoder(w).Encode(result)
+	} else {
+		var result = devices.GetAllDevices()
 
-	json.NewEncoder(w).Encode(result)
-}
+		json.NewEncoder(w).Encode(result)
+	}
 
-func getDeviceByIdHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-	Zap.Logger.Infow(
-		"Handling Req",
-		"method", "GET",
-		"route", "/devices/{id}",
-		"id", id,
-	)
-	var result = devices.GetDeviceById(dbutils.StringToObjectId(id))
-	json.NewEncoder(w).Encode(result)
-}
-
-func getDevicesByTypeHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	device_type := vars["type"]
-	Zap.Logger.Infow(
-		"Handling Req",
-		"method", "GET",
-		"route", "devices/type/{type}",
-		"type", device_type,
-	)
-
-	var result = devices.GetDevicesOfType(device_type)
-	json.NewEncoder(w).Encode(result)
 }
 
 func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,26 +61,30 @@ func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-	Zap.Logger.Infow(
-		"Handling Req",
-		"method", "DELETE",
-		"route", "/devices/{id}", //? Can I format this value to contain the actual Id?
-		"id", id,
-	)
 
-	devices.DeleteDevice(dbutils.StringToObjectId(id))
+	query := r.URL.Query()
+	fmt.Println(query.Encode())
+
+	if !query.Has("id") {
+		Zap.Logger.Errorf("No id provided")
+	} else {
+		id := query.Get("id")
+		Zap.Logger.Infow(
+			"Handling Req",
+			"method", "DELETE",
+			"route", "/devices/{id}", //? Can I format this value to contain the actual Id?
+			"id", id,
+		)
+		devices.DeleteDevice(dbutils.StringToObjectId(id))
+	}
 }
 
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true) // What is StrictSlash?
 	myRouter.HandleFunc("/devices", newDeviceHandler).Methods("POST")
-	myRouter.HandleFunc("/devices", allDeviceHandler)
-	myRouter.HandleFunc("/devices/{id}", deleteDeviceHandler).Methods("DELETE")
-	myRouter.HandleFunc("/devices/{id}", getDeviceByIdHandler).Methods("GET")
+	myRouter.HandleFunc("/devices", deleteDeviceHandler).Methods("DELETE")
+	myRouter.HandleFunc("/devices", getDeviceHandler)
 
-	myRouter.HandleFunc("/devices/type/{type}", getDevicesByTypeHandler).Methods("GET")
 	log.Fatal(http.ListenAndServe(":5000", myRouter))
 }
 
