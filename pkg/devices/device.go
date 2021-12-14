@@ -3,15 +3,22 @@ package devices
 import (
 	"fmt"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mitchellh/mapstructure"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type Command struct {
+	// Id    string `mapstructure:"_id" bson:"_id,omitempty"`
+	Power string `mapstructure:"power" bson:"power"`
+}
+
 type Device interface {
 	getId() primitive.ObjectID
 	getName() string
 	save() *mongo.InsertOneResult
+	Command(command Command, mqtt_client mqtt.Client)
 }
 
 func DeviceFactory(data primitive.M) (Device, error) {

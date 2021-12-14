@@ -8,7 +8,7 @@ import (
 )
 
 var broker = "10.0.0.228"
-var port = 9002
+var port = 9001
 
 var Zap = zap.NewLogger()
 

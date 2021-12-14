@@ -1,7 +1,10 @@
 package devices
 
 import (
+	"fmt"
+
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -31,4 +34,8 @@ func (dev YeelightDevice) save() *mongo.InsertOneResult {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)
 	}
 	return insResult
+}
+
+func (dev YeelightDevice) Command(command Command, mqtt_client mqtt.Client) {
+	fmt.Printf("Commanding %s device", dev.Type)
 }

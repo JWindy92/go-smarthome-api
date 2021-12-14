@@ -9,13 +9,14 @@ import (
 	dbutils "github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	devices "github.com/JWindy92/go-smarthome-api/pkg/devices"
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
+	"github.com/JWindy92/go-smarthome-api/pkg/mqtt_utils"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var Zap = zap.NewLogger()
 
-// var MqttClient = mqtt_utils.MqttInit()
+var MqttClient = mqtt_utils.MqttInit()
 
 // TODO: the main functions called by the handlers should be run concurrently using goroutines
 func getDeviceHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +64,6 @@ func newDeviceHandler(w http.ResponseWriter, r *http.Request) {
 func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
-	fmt.Println(query.Encode())
 
 	if !query.Has("id") {
 		Zap.Logger.Errorf("No id provided")
@@ -79,11 +79,35 @@ func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func deviceCommand(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	var command devices.Command
+	err := json.NewDecoder(r.Body).Decode(&command)
+	if err != nil {
+		Zap.Logger.Errorf("error inserting new device document: %s", err)
+	}
+
+	if !query.Has("id") {
+		Zap.Logger.Errorf("No id provided")
+	} else {
+		id := query.Get("id")
+		Zap.Logger.Infow(
+			"Device Command",
+			"method", "POST",
+			"id", id,
+		)
+		device := devices.GetDeviceById(dbutils.StringToObjectId(id))
+		device.Command(command, MqttClient)
+	}
+}
+
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true) // What is StrictSlash?
 	myRouter.HandleFunc("/devices", newDeviceHandler).Methods("POST")
 	myRouter.HandleFunc("/devices", deleteDeviceHandler).Methods("DELETE")
 	myRouter.HandleFunc("/devices", getDeviceHandler)
+
+	myRouter.HandleFunc("/devices/command", deviceCommand).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":5000", myRouter))
 }
