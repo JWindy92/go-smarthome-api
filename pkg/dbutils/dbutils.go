@@ -2,6 +2,7 @@ package dbutils
 
 import (
 	"context"
+	"os"
 	"strconv"
 	"time"
 
@@ -20,7 +21,16 @@ type MongoInstance struct {
 	Database string
 }
 
-const mongohost = "localhost"
+func getEnv(key string, fallback string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return fallback
+	}
+	return value
+}
+
+var mongohost = getEnv("MONGOHOST", "localhost")
+
 const mongoport = 27017
 const dbname = "smarthome"
 
