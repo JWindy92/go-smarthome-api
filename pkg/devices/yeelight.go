@@ -1,13 +1,20 @@
 package devices
 
 import (
-	"fmt"
+	"encoding/json"
 
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+const YEELIGHT_TOPIC = "yeelight/cmnd"
+
+type CommandWrapper struct {
+	Ip_addr string  `json:"ip_addr"`
+	Cmd     Command `json:"cmd"`
+}
 
 type YeelightDevice struct {
 	Id      primitive.ObjectID `mapstructure:"_id" bson:"_id,omitempty"`
@@ -37,5 +44,10 @@ func (dev YeelightDevice) save() *mongo.InsertOneResult {
 }
 
 func (dev YeelightDevice) Command(command Command, mqtt_client mqtt.Client) {
-	fmt.Printf("Commanding %s device", dev.Type)
+	wrapped := CommandWrapper{Ip_addr: dev.Ip_Addr, Cmd: command}
+	json_cmd, err := json.Marshal(&wrapped)
+	if err != nil {
+		Zap.Logger.Errorf("error parsing yeelight command: %s", err)
+	}
+	mqtt_client.Publish(YEELIGHT_TOPIC, 1, false, json_cmd)
 }

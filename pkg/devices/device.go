@@ -11,7 +11,7 @@ import (
 
 type Command struct {
 	// Id    string `mapstructure:"_id" bson:"_id,omitempty"`
-	Power string `mapstructure:"power" bson:"power"`
+	Power string `mapstructure:"power" bson:"power" json:"power"`
 }
 
 type Device interface {
