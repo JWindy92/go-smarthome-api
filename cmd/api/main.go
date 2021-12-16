@@ -19,11 +19,6 @@ var Zap = zap.NewLogger()
 
 var MqttClient = mqtt_utils.MqttInit()
 
-// func enableCors(w *http.ResponseWriter) {
-// 	Zap.Logger.Info("Enabling CORS")
-// 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-// }
-
 // TODO: the main functions called by the handlers should be run concurrently using goroutines
 func getDeviceHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -145,6 +140,6 @@ func main() {
 		"port", 5000,
 	)
 
-	Zap.Logger.Infof("PLEASE WORK!!!")
+	Zap.Logger.Infof("Ready to recieve requests")
 	handleRequests()
 }

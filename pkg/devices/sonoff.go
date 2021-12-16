@@ -5,6 +5,7 @@ import (
 
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -14,6 +15,7 @@ type SonoffDevice struct {
 	Name  string             `mapstructure:"name" bson:"name"`
 	Type  string             `mapstructure:"type" bson:"type"`
 	Topic string             `mapstructure:"topic" bson:"topic"`
+	State bool               `mapstructure:"state" bson:"state"`
 }
 
 func (dev SonoffDevice) getId() primitive.ObjectID {
@@ -35,9 +37,24 @@ func (dev SonoffDevice) save() *mongo.InsertOneResult {
 	return insResult
 }
 
+func (dev SonoffDevice) update() *mongo.UpdateResult {
+	m := dbutils.InitMongoInstance()
+	defer m.Close()
+	collection := m.Client.Database(m.Database).Collection("devices")
+	updateResult, err := collection.UpdateByID(m.Context, bson.M{"id": dev.getId()}, bson.M{"$set": dev})
+	if err != nil {
+		Zap.Logger.Errorf("error inserting new device document: %s", err)
+	}
+	return updateResult
+}
+
 func (dev SonoffDevice) Command(command Command, mqtt_client mqtt.Client) {
-	if command.Power != "" {
-		dev.power(command.Power, mqtt_client)
+	if command.validate() {
+		if command.Power != "" {
+			dev.power(command.Power, mqtt_client)
+			dev.State = command.powerStringToBool()
+		}
+		dev.update()
 	}
 }
 

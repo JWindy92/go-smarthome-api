@@ -14,10 +14,27 @@ type Command struct {
 	Power string `mapstructure:"power" bson:"power" json:"power"`
 }
 
+//TODO: this needs to be cleaned up and made more flexible
+func (cmd Command) validate() bool {
+	if cmd.Power != "on" && cmd.Power != "off" {
+		return false
+	}
+	return true
+}
+
+func (cmd Command) powerStringToBool() bool {
+	if cmd.Power == "on" {
+		return true
+	} else {
+		return false
+	}
+}
+
 type Device interface {
 	getId() primitive.ObjectID
 	getName() string
 	save() *mongo.InsertOneResult
+	update() *mongo.UpdateResult
 	Command(command Command, mqtt_client mqtt.Client)
 }
 
