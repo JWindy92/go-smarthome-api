@@ -11,6 +11,7 @@ import (
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 	"github.com/JWindy92/go-smarthome-api/pkg/mqtt_utils"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,9 +19,15 @@ var Zap = zap.NewLogger()
 
 var MqttClient = mqtt_utils.MqttInit()
 
+// func enableCors(w *http.ResponseWriter) {
+// 	Zap.Logger.Info("Enabling CORS")
+// 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+// }
+
 // TODO: the main functions called by the handlers should be run concurrently using goroutines
 func getDeviceHandler(w http.ResponseWriter, r *http.Request) {
 
+	// enableCors(&w)
 	query := r.URL.Query()
 	fmt.Println(query.Encode())
 
@@ -80,6 +87,7 @@ func deleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deviceCommand(w http.ResponseWriter, r *http.Request) {
+	// enableCors(&w)
 	query := r.URL.Query()
 	var command devices.Command
 	err := json.NewDecoder(r.Body).Decode(&command)
@@ -99,17 +107,31 @@ func deviceCommand(w http.ResponseWriter, r *http.Request) {
 		device := devices.GetDeviceById(dbutils.StringToObjectId(id))
 		device.Command(command, MqttClient)
 	}
+	json.NewEncoder(w).Encode("200")
 }
 
 func handleRequests() {
-	myRouter := mux.NewRouter().StrictSlash(true) // What is StrictSlash?
-	myRouter.HandleFunc("/devices", newDeviceHandler).Methods("POST")
-	myRouter.HandleFunc("/devices", deleteDeviceHandler).Methods("DELETE")
-	myRouter.HandleFunc("/devices", getDeviceHandler)
+	router := mux.NewRouter().StrictSlash(true) // What is StrictSlash?
 
-	myRouter.HandleFunc("/devices/command", deviceCommand).Methods("POST")
+	// headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	// credentials := handlers.AllowCredentials()
+	// methods := handlers.AllowedMethods(([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}))
+	// // ttl := handlers.MaxAge(3600)
+	// origins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
 
-	log.Fatal(http.ListenAndServe(":5000", myRouter))
+	router.HandleFunc("/devices", newDeviceHandler).Methods("POST")
+	router.HandleFunc("/devices", deleteDeviceHandler).Methods("DELETE")
+	router.HandleFunc("/devices", getDeviceHandler)
+
+	router.HandleFunc("/devices/command", deviceCommand).Methods("POST")
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(router)
+	log.Fatal(http.ListenAndServe(":5000", handler))
 }
 
 func main() {
@@ -123,6 +145,6 @@ func main() {
 		"port", 5000,
 	)
 
-	Zap.Logger.Infof("Ready to accept requests")
+	Zap.Logger.Infof("PLEASE WORK!!!")
 	handleRequests()
 }
