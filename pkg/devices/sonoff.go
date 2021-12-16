@@ -10,12 +10,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type SonoffState struct {
+	Power bool `json:"power"`
+}
+
 type SonoffDevice struct {
 	Id    primitive.ObjectID `mapstructure:"_id" bson:"_id,omitempty"`
 	Name  string             `mapstructure:"name" bson:"name"`
 	Type  string             `mapstructure:"type" bson:"type"`
 	Topic string             `mapstructure:"topic" bson:"topic"`
-	State bool               `mapstructure:"state" bson:"state"`
+	State SonoffState        `mapstructure:"state" bson:"state"`
 }
 
 func (dev SonoffDevice) getId() primitive.ObjectID {
@@ -54,9 +58,8 @@ func (dev SonoffDevice) Command(command Command, mqtt_client mqtt.Client) {
 	if command.validate() {
 		if command.Power != "" {
 			dev.power(command.Power, mqtt_client)
-			dev.State = command.powerStringToBool()
+			dev.State.Power = command.powerStringToBool()
 		}
-		fmt.Print(dev.State)
 		dev.update()
 	}
 }
