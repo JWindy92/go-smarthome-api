@@ -37,14 +37,16 @@ func (dev SonoffDevice) save() *mongo.InsertOneResult {
 	return insResult
 }
 
+// TODO: This may be able to be common
 func (dev SonoffDevice) update() *mongo.UpdateResult {
 	m := dbutils.InitMongoInstance()
 	defer m.Close()
 	collection := m.Client.Database(m.Database).Collection("devices")
-	updateResult, err := collection.UpdateByID(m.Context, bson.M{"id": dev.getId()}, bson.M{"$set": dev})
+	updateResult, err := collection.UpdateOne(m.Context, bson.M{"_id": dev.getId()}, bson.M{"$set": dev})
 	if err != nil {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)
 	}
+	Zap.Logger.Infof("Result: %d", updateResult.ModifiedCount)
 	return updateResult
 }
 
@@ -54,6 +56,7 @@ func (dev SonoffDevice) Command(command Command, mqtt_client mqtt.Client) {
 			dev.power(command.Power, mqtt_client)
 			dev.State = command.powerStringToBool()
 		}
+		fmt.Print(dev.State)
 		dev.update()
 	}
 }
