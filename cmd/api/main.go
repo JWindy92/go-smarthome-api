@@ -10,6 +10,7 @@ import (
 	devices "github.com/JWindy92/go-smarthome-api/pkg/devices"
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 	"github.com/JWindy92/go-smarthome-api/pkg/mqtt_utils"
+	"github.com/JWindy92/go-smarthome-api/pkg/scenes"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -105,20 +106,40 @@ func deviceCommand(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("200")
 }
 
+func getScenesHandler(w http.ResponseWriter, r *http.Request) {
+	var result = scenes.GetAllScenes()
+
+	json.NewEncoder(w).Encode(result)
+}
+
+func setSceneHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	if !query.Has("id") {
+		Zap.Logger.Errorf("No id provided")
+	} else {
+		id := query.Get("id")
+		Zap.Logger.Infow(
+			"Setting Scene",
+			"method", "POST",
+			"id", id,
+		)
+		scene := scenes.GetSceneById(dbutils.StringToObjectId(id))
+		scene.SetScene(MqttClient)
+	}
+	json.NewEncoder(w).Encode("200")
+}
+
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true) // What is StrictSlash?
-
-	// headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
-	// credentials := handlers.AllowCredentials()
-	// methods := handlers.AllowedMethods(([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"}))
-	// // ttl := handlers.MaxAge(3600)
-	// origins := handlers.AllowedOrigins([]string{"http://localhost:3000"})
 
 	router.HandleFunc("/devices", newDeviceHandler).Methods("POST")
 	router.HandleFunc("/devices", deleteDeviceHandler).Methods("DELETE")
 	router.HandleFunc("/devices", getDeviceHandler)
 
 	router.HandleFunc("/devices/command", deviceCommand).Methods("POST")
+
+	router.HandleFunc("/scenes", setSceneHandler).Methods("POST")
+	router.HandleFunc("/scenes", getScenesHandler)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000", "http://10.0.0.228:3000"},

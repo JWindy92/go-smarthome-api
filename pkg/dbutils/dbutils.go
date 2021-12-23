@@ -29,7 +29,7 @@ func getEnv(key string, fallback string) string {
 	return value
 }
 
-var mongohost = getEnv("MONGOHOST", "localhost")
+var mongohost = getEnv("MONGOHOST", "10.0.0.228")
 
 const mongoport = 27017
 const dbname = "smarthome"
@@ -97,7 +97,7 @@ func (m MongoInstance) Ping() error {
 
 func (m MongoInstance) Query(col string, query bson.M) []bson.M {
 	var devices []bson.M
-	cursor, err := m.execute_query("devices", query)
+	cursor, err := m.execute_query(col, query)
 	if err != nil {
 		Zap.Logger.Error("error querying the database", err)
 	}
