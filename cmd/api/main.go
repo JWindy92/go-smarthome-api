@@ -121,7 +121,7 @@ func handleRequests() {
 	router.HandleFunc("/devices/command", deviceCommand).Methods("POST")
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedOrigins:   []string{"http://localhost:3000", "http://10.0.0.228:3000"},
 		AllowCredentials: true,
 	})
 
