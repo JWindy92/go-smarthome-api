@@ -14,8 +14,8 @@ var Zap = zap.NewLogger()
 var DB_COLLECTION = "scenes"
 
 type SceneState struct {
-	Id      primitive.ObjectID `bson:"device_id"`
-	Command devices.Command
+	Id      primitive.ObjectID `mapstructure:"device_id" bson:"device_id"`
+	Command devices.Command    `mapstructure:"command" bson:"command"`
 }
 
 type Scene struct {

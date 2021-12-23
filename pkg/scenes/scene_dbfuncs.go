@@ -7,30 +7,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// func mapScenesFromPrimitives(data []primitive.M) []Scene {
-// 	var devices []Scene
-// 	for _, doc := range data {
-// 		device, err := DeviceFactory(doc)
-// 		if err != nil {
-// 			Zap.Logger.Error("error mapping device object: %s", err)
-// 		}
-// 		devices = append(devices, device)
-// 	}
-// 	return devices
-// }
-// func DeviceFactory(data primitive.M) (Device, error) {
-// 	if data["type"] == "sonoff" {
-// 		device := SonoffDevice{}
-// 		mapstructure.Decode(data, &device)
-// 		return device, nil
-// 	}
-// 	if data["type"] == "yeelight" {
-// 		device := YeelightDevice{}
-// 		mapstructure.Decode(data, &device)
-// 		return device, nil
-// 	}
-// 	return nil, fmt.Errorf("invalid device type %s", data["type"])
-// }
 func GetSceneById(id primitive.ObjectID) Scene {
 	Zap.Logger.Infow(
 		"Fetching device by Id",
@@ -39,8 +15,7 @@ func GetSceneById(id primitive.ObjectID) Scene {
 	m := dbutils.InitMongoInstance()
 	defer m.Close()
 
-	data := m.Query("devices", bson.M{"_id": id})
-
+	data := m.Query("scenes", bson.M{"_id": id})
 	scene := Scene{}
 	mapstructure.Decode(data[0], &scene)
 
