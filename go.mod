@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/mitchellh/mapstructure v1.4.2
 	github.com/rs/cors v1.8.0
 	github.com/tj/assert v0.0.3
@@ -16,7 +17,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
