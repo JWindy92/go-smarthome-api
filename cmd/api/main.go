@@ -7,13 +7,44 @@ import (
 	"github.com/JWindy92/go-smarthome-api/pkg/handlers"
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
 )
 
 var Zap = zap.NewLogger()
 
+var upgrader = websocket.Upgrader{}
+
+type socketData struct {
+	Id    string      `json:"Id"`
+	State interface{} `json:"State"`
+}
+
+func wsReader(conn *websocket.Conn) {
+	for {
+		var data socketData
+		conn.ReadJSON(&data)
+
+		conn.WriteJSON(data)
+	}
+}
+func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+	// TODO: Actually check origin
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		Zap.Logger.Errorf("error upgrading to websocket connection: ", err)
+	}
+	defer ws.Close()
+	Zap.Logger.Infof("Client connected")
+
+	wsReader(ws)
+}
+
 func handleRequests() {
 	router := mux.NewRouter().StrictSlash(true) // What is StrictSlash?
+
+	router.HandleFunc("/ws", wsEndpoint)
 
 	router.HandleFunc("/devices", handlers.NewDeviceHandler).Methods("POST")
 	router.HandleFunc("/devices", handlers.DeleteDeviceHandler).Methods("DELETE")
