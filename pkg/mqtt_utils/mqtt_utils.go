@@ -17,6 +17,8 @@ type MqttHandler struct {
 	Client *mqtt.Client
 }
 
+var MqttClient = MqttInit()
+
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	fmt.Printf("%s", msg.Payload())
 	Zap.Logger.Infow(
