@@ -63,7 +63,7 @@ func (dev YeelightDevice) update() *mongo.UpdateResult {
 	return updateResult
 }
 
-func (dev YeelightDevice) Command(command Command, mqtt_client mqtt.Client) {
+func (dev YeelightDevice) Command(command Command, mqtt_client mqtt.Client) Device {
 	if command.validate() {
 		wrapped := CommandWrapper{Ip_addr: dev.Ip_Addr, Cmd: command}
 		json_cmd, err := json.Marshal(&wrapped)
@@ -75,4 +75,5 @@ func (dev YeelightDevice) Command(command Command, mqtt_client mqtt.Client) {
 		dev.State.Power = command.powerStringToBool()
 		dev.update()
 	}
+	return dev
 }

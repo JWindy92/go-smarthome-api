@@ -94,7 +94,7 @@ func DeviceCommand(w http.ResponseWriter, r *http.Request) {
 			"id", id,
 		)
 		device := devices.GetDeviceById(dbutils.StringToObjectId(id))
-		device.Command(command, mqtt_utils.MqttClient)
+		res := device.Command(command, mqtt_utils.MqttClient)
+		json.NewEncoder(w).Encode(res)
 	}
-	json.NewEncoder(w).Encode("200")
 }

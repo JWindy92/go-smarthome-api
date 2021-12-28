@@ -35,7 +35,7 @@ type Device interface {
 	getName() string
 	save() *mongo.InsertOneResult
 	update() *mongo.UpdateResult
-	Command(command Command, mqtt_client mqtt.Client)
+	Command(command Command, mqtt_client mqtt.Client) Device
 }
 
 func DeviceFactory(data primitive.M) (Device, error) {

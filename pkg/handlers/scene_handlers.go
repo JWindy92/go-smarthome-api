@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
+	"github.com/JWindy92/go-smarthome-api/pkg/devices"
 	"github.com/JWindy92/go-smarthome-api/pkg/mqtt_utils"
 	"github.com/JWindy92/go-smarthome-api/pkg/scenes"
 )
@@ -17,6 +18,7 @@ func GetScenesHandler(w http.ResponseWriter, r *http.Request) {
 
 func SetSceneHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
+	result := []devices.Device{}
 	if !query.Has("id") {
 		Zap.Logger.Errorf("No id provided")
 	} else {
@@ -27,7 +29,7 @@ func SetSceneHandler(w http.ResponseWriter, r *http.Request) {
 			"id", id,
 		)
 		scene := scenes.GetSceneById(dbutils.StringToObjectId(id))
-		scene.SetScene(mqtt_utils.MqttClient)
+		result = scene.SetScene(mqtt_utils.MqttClient)
 	}
-	json.NewEncoder(w).Encode("200")
+	json.NewEncoder(w).Encode(result)
 }

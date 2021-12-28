@@ -35,9 +35,12 @@ func (sc Scene) saveNewScene() *mongo.InsertOneResult {
 	return insResult
 }
 
-func (sc Scene) SetScene(mqtt_client mqtt.Client) {
+func (sc Scene) SetScene(mqtt_client mqtt.Client) []devices.Device {
+	result := []devices.Device{}
 	for _, state := range sc.States {
 		device := devices.GetDeviceById(state.Id)
-		device.Command(state.Command, mqtt_client)
+		res := device.Command(state.Command, mqtt_client)
+		result = append(result, res)
 	}
+	return result
 }

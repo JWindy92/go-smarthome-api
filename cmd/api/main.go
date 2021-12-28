@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var Zap = zap.NewLogger()
@@ -16,16 +17,23 @@ var Zap = zap.NewLogger()
 var upgrader = websocket.Upgrader{}
 
 type socketData struct {
-	Id    string      `json:"Id"`
-	State interface{} `json:"State"`
+	Id    primitive.ObjectID `json:"Id"`
+	State interface{}        `json:"State"`
 }
 
 func wsReader(conn *websocket.Conn) {
 	for {
-		var data socketData
-		conn.ReadJSON(&data)
-
-		conn.WriteJSON(data)
+		mt, message, err := conn.ReadMessage()
+		if err != nil {
+			log.Println("read:", err)
+			break
+		}
+		log.Printf("recv: %s", message)
+		err = conn.WriteMessage(mt, message)
+		if err != nil {
+			log.Println("write:", err)
+			break
+		}
 	}
 }
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {

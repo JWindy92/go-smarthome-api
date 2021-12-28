@@ -54,7 +54,7 @@ func (dev SonoffDevice) update() *mongo.UpdateResult {
 	return updateResult
 }
 
-func (dev SonoffDevice) Command(command Command, mqtt_client mqtt.Client) {
+func (dev SonoffDevice) Command(command Command, mqtt_client mqtt.Client) Device {
 	if command.validate() {
 		if command.Power != "" {
 			dev.power(command.Power, mqtt_client)
@@ -62,6 +62,7 @@ func (dev SonoffDevice) Command(command Command, mqtt_client mqtt.Client) {
 		}
 		dev.update()
 	}
+	return dev
 }
 
 func (dev SonoffDevice) power(power string, mqtt_client mqtt.Client) {
