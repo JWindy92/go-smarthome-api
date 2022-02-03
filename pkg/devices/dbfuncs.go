@@ -1,5 +1,7 @@
 package devices
 
+//TODO: move dbfuncs.go back to dbutils package, and break into separate files according to the entities they interact with (i.e. devices.go, scenes.go, etc.)
+
 import (
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	zap "github.com/JWindy92/go-smarthome-api/pkg/logwrapper"

@@ -1,6 +1,8 @@
 package devices
 
 import (
+	"encoding/json"
+
 	"github.com/JWindy92/go-smarthome-api/pkg/dbutils"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mitchellh/mapstructure"
@@ -30,17 +32,22 @@ import (
 // 	}
 // }
 
+type DeviceCommand struct {
+	DesiredState DeviceState
+	Device       Device
+}
+
 type DeviceState struct {
-	Power bool
+	Power bool `json:"power"`
 }
 
 type Device struct {
-	Id     primitive.ObjectID
-	Name   string
-	Type   string
-	Topic  string
-	IpAddr string
-	State  DeviceState
+	Id     primitive.ObjectID `mapstructure:"_id,omitempty" bson:"_id,omitempty" json:"_id,omitempty"`
+	Name   string             `mapstructure:"name" bson:"name" json:"name"`
+	Type   string             `mapstructure:"type" bson:"type" json:"type"`
+	Topic  string             `mapstructure:"topic,omitempty" bson:"topic,omitempty" json:"topic,omitempty"`
+	IpAddr string             `mapstructure:"ip_addr,omitempty" bson:"ip_addr,omitempty" json:"ip_addr,omitempty"`
+	State  DeviceState        `mapstructure:"state" bson:"state" json:"state"`
 }
 
 // type Device interface {
@@ -86,10 +93,23 @@ func (dev Device) update() *mongo.UpdateResult {
 func (dev Device) Command(command DeviceState, mqtt_client mqtt.Client) Device {
 	//TODO:
 	//Determines endpoint based on "type"
+	device_command := DeviceCommand{
+		DesiredState: command,
+		Device:       dev,
+	}
+
+	payload, err := json.Marshal(device_command)
+	if err != nil {
+		Zap.Logger.Errorf("something went wrong crafting payload: %s", err)
+	}
+
+	if dev.Type == "sonoff" {
+		mqtt_client.Publish("sonoff/command", 1, false, payload)
+	}
 	//Sends mqtt or rest containing the command (desired state)
 	//and the device data so that the service can do whatever
 	//it needs to do
-
+	Zap.Logger.Info(command)
 	//Then does a dev.update() to update the DB
 	dev.State = command
 	//TODO: Do something with UpdateResult
