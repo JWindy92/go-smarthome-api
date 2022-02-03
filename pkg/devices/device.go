@@ -91,6 +91,9 @@ func (dev Device) Command(command DeviceState, mqtt_client mqtt.Client) Device {
 	//it needs to do
 
 	//Then does a dev.update() to update the DB
+	dev.State = command
+	//TODO: Do something with UpdateResult
+	_ = dev.update()
 
 	return dev
 }
