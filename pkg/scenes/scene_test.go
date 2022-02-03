@@ -23,11 +23,11 @@ func TestSceneSave(t *testing.T) {
 		States: []SceneState{
 			{
 				dbutils.StringToObjectId("61b7b943bc98e93f94a4bf37"),
-				devices.Command{Power: "on"},
+				devices.DeviceState{Power: true},
 			},
 			{
 				dbutils.StringToObjectId("61b8c6a255fa968bf76d665f"),
-				devices.Command{Power: "on"},
+				devices.DeviceState{Power: true},
 			},
 		},
 	}
@@ -42,11 +42,11 @@ func TestSetScene(t *testing.T) {
 		States: []SceneState{
 			{
 				dbutils.StringToObjectId("61b7b943bc98e93f94a4bf37"),
-				devices.Command{Power: "on"},
+				devices.DeviceState{Power: true},
 			},
 			{
 				dbutils.StringToObjectId("61b8c6a255fa968bf76d665f"),
-				devices.Command{Power: "on"},
+				devices.DeviceState{Power: true},
 			},
 		},
 	}

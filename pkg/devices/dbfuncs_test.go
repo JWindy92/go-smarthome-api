@@ -31,7 +31,7 @@ func TestGetDevicesOfType(t *testing.T) {
 func TestGetDeviceById(t *testing.T) {
 	id, _ := primitive.ObjectIDFromHex("6193dc0ad4834c225103cabc")
 
-	device := SonoffDevice{Id: id, Name: "sonoff1", Topic: "test/sonoff1", Type: "sonoff"}
+	device := Device{Id: id, Name: "sonoff1", Topic: "test/sonoff1", Type: "sonoff"}
 	result := GetDeviceById(id)
 
 	if result.getId() != device.getId() {

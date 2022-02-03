@@ -78,7 +78,7 @@ func DeleteDeviceHandler(w http.ResponseWriter, r *http.Request) {
 func DeviceCommand(w http.ResponseWriter, r *http.Request) {
 	// enableCors(&w)
 	query := r.URL.Query()
-	var command devices.Command
+	var command devices.DeviceState
 	err := json.NewDecoder(r.Body).Decode(&command)
 	if err != nil {
 		Zap.Logger.Errorf("error inserting new device document: %s", err)

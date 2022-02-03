@@ -60,11 +60,10 @@ func CreateNewDevice(reqBody primitive.M) *mongo.InsertOneResult {
 	Zap.Logger.Infow(
 		"Creating new device",
 	)
-
-	device, err := DeviceFactory(reqBody)
-	if err != nil {
-		Zap.Logger.Error("error mapping device object: %s", err)
-	}
+	//TODO This may be able to be cleaner
+	var data []primitive.M
+	data = append(data, reqBody)
+	device := mapDevicesFromPrimitives(data)[0]
 	result := device.save()
 
 	return result
